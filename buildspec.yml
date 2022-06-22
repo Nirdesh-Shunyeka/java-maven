@@ -3,7 +3,7 @@ env:
   secrets-manager:
     LOGIN: dev/test/sonar:sonartoken
     HOST: dev/test/sonar:host
-    Project: java-sonarqube-testing
+    Project: "java-sonarqube-testing"
 phases:
   install:
     runtime-versions:
@@ -11,6 +11,7 @@ phases:
     commands:
       - apt -y update && apt -y upgrade
       - apt install -y jq
+      - apt install -y maven
   pre_build:
     commands:
       - mkdir downloads -p && cd downloads
@@ -23,7 +24,8 @@ phases:
       - pwd
       - cd ../
       - ls
-      - sonar-scanner -Dsonar.projectKey=$Project -Dsonar.sources=. -Dsonar.host.url=$HOST -Dsonar.login=$LOGIN
+      - mvn test
+      - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project
       - sleep 5
       - curl -u $LOGIN https://eco-dev-use1-sonarqube.contentservice.net/api/qualitygates/project_status?projectKey=$Project > result.json
       - cat result.json
