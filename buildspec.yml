@@ -1,9 +1,9 @@
 version: 0.2
 env:
   secrets-manager:
-    LOGIN: dev/test/sonar:sonartoken
-    HOST: dev/test/sonar:host
-    Project: "java-sonarqube-testing"
+    LOGIN: dev/java:sonartoken
+    HOST: dev/java:host
+    Project: dev/java:project
 phases:
   install:
     runtime-versions:
