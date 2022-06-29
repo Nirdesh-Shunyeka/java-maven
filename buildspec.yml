@@ -1,31 +1,31 @@
 version: 0.2
 env:
-  secrets-manager:
-    LOGIN: dev/java:sonartoken
-    HOST: dev/java:host
-    Project: dev/java:project
+  variables:
+    LOGIN: "8db2d629a779b198b8ae22aad2ceeb47d4072d0d"
+    HOST: "https://eco-dev-use1-sonarqube.contentservice.net/"
+    Project: "maven-sonarqube-analysis"
 phases:
   install:
     runtime-versions:
       java: corretto11
     commands:
-      - apt -y update && apt -y upgrade
-      - apt install -y jq
-      - apt install -y maven
+      - yum -y update && yum -y upgrade
+      - yum install -y jq
   pre_build:
     commands:
+      - wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
+      - sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
+      - yum install -y apache-maven
+      - mvn –version
       - mkdir downloads -p && cd downloads
       - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
       - unzip sonar-scanner-cli-4.7.0.2747-linux.zip
       - mv sonar-scanner-4.7.0.2747-linux /opt/sonar-scanner
       - export PATH="$PATH:/opt/sonar-scanner/bin"
+      - cd $CODEBUILD_SRC_DIR
   build:
     commands:
-      - pwd
-      - cd ../
-      - ls
-      - mvn test
-      - mvn sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project
+      - mvn clean verify sonar:sonar -Dsonar.login=$LOGIN -Dsonar.host.url=$HOST -Dsonar.projectKey=$Project
       - sleep 5
       - curl -u $LOGIN https://eco-dev-use1-sonarqube.contentservice.net/api/qualitygates/project_status?projectKey=$Project > result.json
       - cat result.json
