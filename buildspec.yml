@@ -19,7 +19,7 @@ phases:
       - cd $CODEBUILD_SRC_DIR
   build:
     commands:
-      - mvn sonar:sonar -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.projectKey=$SONARQUBE_PROJECT
+      - mvn clean verify sonar:sonar -Dsonar.login=$SONARQUBE_TOKEN -Dsonar.host.url=$SONARQUBE_HOST -Dsonar.projectKey=$SONARQUBE_PROJECT
       - sleep 5
       - curl -u $SONARQUBE_TOKEN $SONARQUBE_HOST/api/qualitygates/project_status?projectKey=$SONARQUBE_PROJECT > result.json
       - cat result.json
