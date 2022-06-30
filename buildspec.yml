@@ -11,20 +11,15 @@ phases:
     commands:
       - yum -y update && yum -y upgrade
       - yum install -y jq
-  pre_build:
-    commands:
       - wget http://repos.fedorapeople.org/repos/dchen/apache-maven/epel-apache-maven.repo -O /etc/yum.repos.d/epel-apache-maven.repo
       - sed -i s/\$releasever/6/g /etc/yum.repos.d/epel-apache-maven.repo
       - yum install -y apache-maven
-      - mkdir downloads -p && cd downloads
-      - wget https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.7.0.2747-linux.zip
-      - unzip sonar-scanner-cli-4.7.0.2747-linux.zip
-      - mv sonar-scanner-4.7.0.2747-linux /opt/sonar-scanner
-      - export PATH="$PATH:/opt/sonar-scanner/bin"
+  pre_build:
+    commands:
       - cd $CODEBUILD_SRC_DIR
   build:
     commands:
-      - sonar-scanner -Dsonar.projectKey=$Project -Dsonar.sources=. -Dsonar.host.url=$HOST -Dsonar.login=$LOGIN
+      - mvn clean verify sonar:sonar -Dsonar.projectKey=$Project -Dsonar.host.url=$HOST -Dsonar.login=$LOGIN
       - sleep 5
       - curl -u $LOGIN $HOST/api/qualitygates/project_status?projectKey=$Project > result.json
       - cat result.json
